@@ -1,0 +1,49 @@
+
+name: Build AzurBot Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find and extract project ZIP
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem -Path . -Filter "Newazur-code.zip" -File | Select-Object -First 1
+
+          if (-not $zip) {
+            Write-Error "Newazur-code.zip introuvable."
+            exit 1
+          }
+
+          Expand-Archive -Path $zip.FullName -DestinationPath source -Force
+
+          if (-not (Test-Path "source/src/AzurBot.csproj")) {
+            Write-Error "Projet C# introuvable après extraction."
+            Get-ChildItem -Path source -Recurse | Select-Object FullName
+            exit 1
+          }
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build Windows EXE
+        shell: pwsh
+        run: dotnet publish "source/src/AzurBot.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+      - name: Upload AzurBot
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzurBot-Windows
+          path: publish/
+          
