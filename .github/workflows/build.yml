@@ -13,20 +13,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract AzurBot project
+      - name: Find latest version
+        id: find_zip
         shell: pwsh
         run: |
-          $zip = Get-ChildItem -Path . -Filter "Newazur-code-v4.zip" -File | Select-Object -First 1
+          $zips = Get-ChildItem -Path . -Filter "Newazur-code-v*.zip" -File |
+            Where-Object { $_.Name -match '^Newazur-code-v(\d+)\.zip$' } |
+            Sort-Object { [int]([regex]::Match($_.Name, '\d+').Value) } -Descending
 
-          if (-not $zip) {
-            Write-Error "Newazur-code-v4.zip introuvable à la racine du dépôt."
+          if (-not $zips) {
+            Write-Error "Aucune archive Newazur-code-vN.zip trouvée à la racine."
             exit 1
           }
 
+          $zip = $zips[0]
+          Write-Host "Version sélectionnée : $($zip.Name)"
           Expand-Archive -Path $zip.FullName -DestinationPath source -Force
 
           if (-not (Test-Path "source/src/AzurBot.csproj")) {
-            Write-Error "Projet source/src/AzurBot.csproj introuvable après extraction."
+            Write-Error "Projet source/src/AzurBot.csproj introuvable dans l'archive."
             exit 1
           }
 
