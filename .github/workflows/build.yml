@@ -17,17 +17,17 @@ jobs:
       - name: Extract corrected project
         shell: pwsh
         run: |
-          $zip = Get-ChildItem -Path . -Filter "Newazur-code-v2.zip" -File | Select-Object -First 1
+          $zip = Get-ChildItem -Path . -Filter "Newazur-code-v3.zip" -File | Select-Object -First 1
 
           if (-not $zip) {
-            Write-Error "Newazur-code-v2.zip introuvable."
+            Write-Error "Newazur-code-v3.zip introuvable."
             exit 1
           }
 
           Expand-Archive -Path $zip.FullName -DestinationPath source -Force
 
           if (-not (Test-Path "source/src/AzurBot.csproj")) {
-            Write-Error "Fichier AzurBot.csproj introuvable."
+            Write-Error "Projet C# introuvable."
             exit 1
           }
 
