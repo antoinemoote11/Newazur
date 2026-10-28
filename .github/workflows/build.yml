@@ -14,7 +14,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Find latest version
-        id: find_zip
         shell: pwsh
         run: |
           $zips = Get-ChildItem -Path . -Filter "Newazur-code-v*.zip" -File |
@@ -22,16 +21,17 @@ jobs:
             Sort-Object { [int]([regex]::Match($_.Name, '\d+').Value) } -Descending
 
           if (-not $zips) {
-            Write-Error "Aucune archive Newazur-code-vN.zip trouvée à la racine."
+            Write-Error "Aucune archive Newazur-code-vN.zip trouvée."
             exit 1
           }
 
           $zip = $zips[0]
           Write-Host "Version sélectionnée : $($zip.Name)"
+
           Expand-Archive -Path $zip.FullName -DestinationPath source -Force
 
           if (-not (Test-Path "source/src/AzurBot.csproj")) {
-            Write-Error "Projet source/src/AzurBot.csproj introuvable dans l'archive."
+            Write-Error "Projet source/src/AzurBot.csproj introuvable."
             exit 1
           }
 
