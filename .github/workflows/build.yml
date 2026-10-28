@@ -14,21 +14,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Find and extract project ZIP
+      - name: Extract corrected project
         shell: pwsh
         run: |
-          $zip = Get-ChildItem -Path . -Filter "Newazur-code.zip" -File | Select-Object -First 1
+          $zip = Get-ChildItem -Path . -Filter "Newazur-code-v2.zip" -File | Select-Object -First 1
 
           if (-not $zip) {
-            Write-Error "Newazur-code.zip introuvable."
+            Write-Error "Newazur-code-v2.zip introuvable."
             exit 1
           }
 
           Expand-Archive -Path $zip.FullName -DestinationPath source -Force
 
           if (-not (Test-Path "source/src/AzurBot.csproj")) {
-            Write-Error "Projet C# introuvable après extraction."
-            Get-ChildItem -Path source -Recurse | Select-Object FullName
+            Write-Error "Fichier AzurBot.csproj introuvable."
             exit 1
           }
 
