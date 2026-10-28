@@ -1,4 +1,3 @@
-
 name: Build AzurBot Windows
 
 on:
@@ -14,20 +13,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract corrected project
+      - name: Extract AzurBot project
         shell: pwsh
         run: |
-          $zip = Get-ChildItem -Path . -Filter "Newazur-code-v3.zip" -File | Select-Object -First 1
+          $zip = Get-ChildItem -Path . -Filter "Newazur-code-v4.zip" -File | Select-Object -First 1
 
           if (-not $zip) {
-            Write-Error "Newazur-code-v3.zip introuvable."
+            Write-Error "Newazur-code-v4.zip introuvable à la racine du dépôt."
             exit 1
           }
 
           Expand-Archive -Path $zip.FullName -DestinationPath source -Force
 
           if (-not (Test-Path "source/src/AzurBot.csproj")) {
-            Write-Error "Projet C# introuvable."
+            Write-Error "Projet source/src/AzurBot.csproj introuvable après extraction."
             exit 1
           }
 
@@ -36,7 +35,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build Windows EXE
+      - name: Compile AzurBot
         shell: pwsh
         run: dotnet publish "source/src/AzurBot.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 
@@ -45,4 +44,3 @@ jobs:
         with:
           name: AzurBot-Windows
           path: publish/
-          
